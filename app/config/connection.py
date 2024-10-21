@@ -12,3 +12,20 @@ db_name = "meu_banco"
 
 # URL de conexão para BD MySQL.
 DATABASE_URL = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+
+# Conectando ao banco de dados
+db = create_engine(DATABASE_URL)
+Session = sessionmaker(bind=db)
+session = Session()
+
+@contextmanager
+def get_db():
+    db = Session() # Cria uma sessão para ações no banco de dados.
+    try:
+        yield db # Caso a sessão realize todas as tarefas, salva a operação.
+        db.commit()
+    except Exception as erro:
+        db.rollback() # Desfaz todas as alterações caso de erro em alguma operação.
+        raise erro # Lança uma exceção
+    finally:
+        db.close #Encerras sessão com o banco de dados.
